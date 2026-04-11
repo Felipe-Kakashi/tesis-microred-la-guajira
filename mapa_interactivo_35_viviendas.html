@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mapa Interactivo - 35 Viviendas Georreferenciadas</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            display: flex;
+            height: 100vh;
+        }
+        #map {
+            position: relative;
+            flex: 1;
+            width: 100%;
+            background: #d9d6d2;
+        }
+        #panel-derecho {
+            width: 360px;
+            background-color: white;
+            border-left: 2px solid #ccc;
+            overflow-y: auto;
+            padding: 12px;
+            box-shadow: -2px 0 5px rgba(0,0,0,0.1);
+        }
+        #panel-derecho h3 {
+            margin: 0 0 8px 0;
+            font-size: 14px;
+            color: #333;
+        }
+        #panel-derecho > p {
+            font-size: 10px;
+            color: #666;
+            margin: 0 0 10px 0;
+        }
+        #panel-derecho table {
+            font-size: 10px;
+            width: 100%;
+            border-collapse: collapse;
+        }
+        #panel-derecho table thead {
+            background-color: #007bff;
+            color: white;
+            position: sticky;
+            top: 0;
+        }
+        #panel-derecho table th {
+            padding: 6px;
+            text-align: left;
+            font-weight: bold;
+        }
+        #panel-derecho table td {
+            padding: 5px;
+            border-bottom: 1px solid #eee;
+        }
+        #panel-derecho table tbody tr:nth-child(odd) {
+            background-color: #f9f9f9;
+        }
+        #panel-derecho table tbody tr:hover {
+            background-color: #e8f4f8;
+        }
+        .info {
+            padding: 8px 12px;
+            background: white;
+            box-shadow: 0 0 15px rgba(0,0,0,0.2);
+            border-radius: 5px;
+            font-size: 12px;
+        }
+        .casa-label {
+            background-color: transparent !important;
+            border: none !important;
+            box-shadow: none !important;
+            color: #d32f2f !important;
+            font-weight: bold !important;
+            font-size: 10px !important;
+            text-align: center !important;
+            text-shadow: 0 0 2px #fff !important;
+        }
+    </style>
+</head>
+<body>
+    <div id="map"></div>
+    <div id="panel-derecho">
+        <h3>Tabla de Viviendas Georreferenciadas</h3>
+        <p>Sistema de referencia: WGS84 (EPSG:4326)</p>
+        <table border="1" cellpadding="6" cellspacing="0">
+            <thead>
+                <tr>
+                    <th>Casa</th>
+                    <th>Latitud</th>
+                    <th>Longitud</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr><td>Casa 1</td><td>11.60631401</td><td>-72.79730846</td></tr>
+<tr><td>Casa 2</td><td>11.60652621</td><td>-72.79726771</td></tr>
+<tr><td>Casa 3</td><td>11.60663426</td><td>-72.79728759</td></tr>
+<tr><td>Casa 4</td><td>11.60642206</td><td>-72.79882988</td></tr>
+<tr><td>Casa 5</td><td>11.60666771</td><td>-72.79820084</td></tr>
+<tr><td>Casa 6</td><td>11.60697301</td><td>-72.79941619</td></tr>
+<tr><td>Casa 7</td><td>11.60668951</td><td>-72.79962587</td></tr>
+<tr><td>Casa 8</td><td>11.60670149</td><td>-72.79962487</td></tr>
+<tr><td>Casa 9</td><td>11.60734681</td><td>-72.80015901</td></tr>
+<tr><td>Casa 10</td><td>11.60725093</td><td>-72.80030310</td></tr>
+<tr><td>Casa 11</td><td>11.60713996</td><td>-72.80041142</td></tr>
+<tr><td>Casa 12</td><td>11.60741251</td><td>-72.80020373</td></tr>
+<tr><td>Casa 13</td><td>11.60635560</td><td>-72.79714800</td></tr>
+<tr><td>Casa 14</td><td>11.60948100</td><td>-72.79916200</td></tr>
+<tr><td>Casa 15</td><td>11.60980615</td><td>-72.79847859</td></tr>
+<tr><td>Casa 16</td><td>11.60998477</td><td>-72.79827214</td></tr>
+<tr><td>Casa 17</td><td>11.61012591</td><td>-72.79840331</td></tr>
+<tr><td>Casa 18</td><td>11.61049000</td><td>-72.79801500</td></tr>
+<tr><td>Casa 19</td><td>11.61068903</td><td>-72.79732982</td></tr>
+<tr><td>Casa 20</td><td>11.61051090</td><td>-72.79712610</td></tr>
+<tr><td>Casa 21</td><td>11.61063939</td><td>-72.79671271</td></tr>
+<tr><td>Casa 22</td><td>11.61074600</td><td>-72.79624400</td></tr>
+<tr><td>Casa 23</td><td>11.61021667</td><td>-72.79610000</td></tr>
+<tr><td>Casa 24</td><td>11.60946881</td><td>-72.79534382</td></tr>
+<tr><td>Casa 25</td><td>11.60901184</td><td>-72.79532246</td></tr>
+<tr><td>Casa 26</td><td>11.60909100</td><td>-72.79482100</td></tr>
+<tr><td>Casa 27</td><td>11.61015609</td><td>-72.80063924</td></tr>
+<tr><td>Casa 28</td><td>11.61029529</td><td>-72.80053688</td></tr>
+<tr><td>Casa 29</td><td>11.61030210</td><td>-72.80045241</td></tr>
+<tr><td>Casa 30</td><td>11.61074889</td><td>-72.79924004</td></tr>
+<tr><td>Casa 31</td><td>11.61106623</td><td>-72.79900950</td></tr>
+<tr><td>Casa 32</td><td>11.61109348</td><td>-72.79896577</td></tr>
+<tr><td>Casa 33</td><td>11.61183911</td><td>-72.79904626</td></tr>
+<tr><td>Casa 34</td><td>11.61192380</td><td>-72.79909794</td></tr>
+<tr><td>Casa 35</td><td>11.61140205</td><td>-72.79962959</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        const viviendas = [{"id": 1, "nombre": "Casa 1", "latitud": 11.60631401, "longitud": -72.79730846}, {"id": 2, "nombre": "Casa 2", "latitud": 11.60652621, "longitud": -72.79726771}, {"id": 3, "nombre": "Casa 3", "latitud": 11.60663426, "longitud": -72.79728759}, {"id": 4, "nombre": "Casa 4", "latitud": 11.60642206, "longitud": -72.79882988}, {"id": 5, "nombre": "Casa 5", "latitud": 11.60666771, "longitud": -72.79820084}, {"id": 6, "nombre": "Casa 6", "latitud": 11.60697301, "longitud": -72.79941619}, {"id": 7, "nombre": "Casa 7", "latitud": 11.60668951, "longitud": -72.79962587}, {"id": 8, "nombre": "Casa 8", "latitud": 11.60670149, "longitud": -72.79962487}, {"id": 9, "nombre": "Casa 9", "latitud": 11.60734681, "longitud": -72.80015901}, {"id": 10, "nombre": "Casa 10", "latitud": 11.60725093, "longitud": -72.8003031}, {"id": 11, "nombre": "Casa 11", "latitud": 11.60713996, "longitud": -72.80041142}, {"id": 12, "nombre": "Casa 12", "latitud": 11.60741251, "longitud": -72.80020373}, {"id": 13, "nombre": "Casa 13", "latitud": 11.6063556, "longitud": -72.797148}, {"id": 14, "nombre": "Casa 14", "latitud": 11.609481, "longitud": -72.799162}, {"id": 15, "nombre": "Casa 15", "latitud": 11.60980615, "longitud": -72.79847859}, {"id": 16, "nombre": "Casa 16", "latitud": 11.60998477, "longitud": -72.79827214}, {"id": 17, "nombre": "Casa 17", "latitud": 11.61012591, "longitud": -72.79840331}, {"id": 18, "nombre": "Casa 18", "latitud": 11.61049, "longitud": -72.798015}, {"id": 19, "nombre": "Casa 19", "latitud": 11.61068903, "longitud": -72.79732982}, {"id": 20, "nombre": "Casa 20", "latitud": 11.6105109, "longitud": -72.7971261}, {"id": 21, "nombre": "Casa 21", "latitud": 11.61063939, "longitud": -72.79671271}, {"id": 22, "nombre": "Casa 22", "latitud": 11.610746, "longitud": -72.796244}, {"id": 23, "nombre": "Casa 23", "latitud": 11.61021667, "longitud": -72.7961}, {"id": 24, "nombre": "Casa 24", "latitud": 11.60946881, "longitud": -72.79534382}, {"id": 25, "nombre": "Casa 25", "latitud": 11.60901184, "longitud": -72.79532246}, {"id": 26, "nombre": "Casa 26", "latitud": 11.609091, "longitud": -72.794821}, {"id": 27, "nombre": "Casa 27", "latitud": 11.61015609, "longitud": -72.80063924}, {"id": 28, "nombre": "Casa 28", "latitud": 11.61029529, "longitud": -72.80053688}, {"id": 29, "nombre": "Casa 29", "latitud": 11.6103021, "longitud": -72.80045241}, {"id": 30, "nombre": "Casa 30", "latitud": 11.61074889, "longitud": -72.79924004}, {"id": 31, "nombre": "Casa 31", "latitud": 11.61106623, "longitud": -72.7990095}, {"id": 32, "nombre": "Casa 32", "latitud": 11.61109348, "longitud": -72.79896577}, {"id": 33, "nombre": "Casa 33", "latitud": 11.61183911, "longitud": -72.79904626}, {"id": 34, "nombre": "Casa 34", "latitud": 11.6119238, "longitud": -72.79909794}, {"id": 35, "nombre": "Casa 35", "latitud": 11.61140205, "longitud": -72.79962959}];
+        const centro = [11.60907207, -72.79839244];
+
+        const map = L.map('map', {
+            zoomControl: false,
+            attributionControl: false
+        }).setView(centro, 16);
+
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png', {
+            maxZoom: 19,
+            subdomains: 'abcd'
+        }).addTo(map);
+
+        const bounds = L.latLngBounds(viviendas.map(v => [v.latitud, v.longitud]));
+        map.fitBounds(bounds, { padding: [30, 30], maxZoom: 17 });
+
+        const homeIcon = L.divIcon({
+            html: '<i class="fa-solid fa-house" style="color: red; font-size: 16px;"></i>',
+            iconSize: [20, 20],
+            iconAnchor: [10, 10],
+            popupAnchor: [0, -10],
+            className: 'custom-div-icon'
+        });
+
+        const offsetsBase = [
+            { direction: 'right',  offset: [12, 0] },
+            { direction: 'left',   offset: [-12, 0] },
+            { direction: 'top',    offset: [0, -12] },
+            { direction: 'bottom', offset: [0, 12] },
+            { direction: 'top',    offset: [10, -10] },
+            { direction: 'bottom', offset: [10, 10] },
+            { direction: 'top',    offset: [-10, -10] },
+            { direction: 'bottom', offset: [-10, 10] }
+        ];
+
+        const offsetsManuales = {
+            7:  { direction: 'left',   offset: [-14, -2] },
+            8:  { direction: 'right',  offset: [14, 2] },
+            9:  { direction: 'top',    offset: [0, -14] },
+            10: { direction: 'bottom', offset: [0, 14] },
+            11: { direction: 'left',   offset: [-14, 0] },
+            12: { direction: 'right',  offset: [14, 0] },
+            27: { direction: 'left',   offset: [-14, -2] },
+            28: { direction: 'top',    offset: [0, -14] },
+            29: { direction: 'right',  offset: [14, 2] },
+            31: { direction: 'left',   offset: [-14, -2] },
+            32: { direction: 'right',  offset: [14, 2] },
+            33: { direction: 'top',    offset: [0, -14] },
+            34: { direction: 'right',  offset: [14, 0] }
+        };
+
+        viviendas.forEach(function(vivienda, idx) {
+            const marker = L.marker([vivienda.latitud, vivienda.longitud], { icon: homeIcon })
+                .bindPopup(`<b>${vivienda.nombre}</b><br>Latitud: ${vivienda.latitud.toFixed(8)}<br>Longitud: ${vivienda.longitud.toFixed(8)}`)
+                .addTo(map);
+
+            const etiqueta = offsetsManuales[vivienda.id] || offsetsBase[idx % offsetsBase.length];
+
+            marker.bindTooltip(`${vivienda.id}`, {
+                permanent: true,
+                direction: etiqueta.direction,
+                offset: etiqueta.offset,
+                className: 'casa-label'
+            });
+        });
+
+    </script>
+</body>
+</html>
