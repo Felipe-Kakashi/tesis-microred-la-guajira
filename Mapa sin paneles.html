@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Red de Distribución DC La Guajira</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+    <style>
+        body { 
+            margin: 0; 
+            padding: 0; 
+            font-family: Arial, sans-serif;
+            display: flex;
+            height: 100vh;
+        }
+        #map { 
+            position: relative;
+            flex: 1;
+            width: 100%;
+        }
+        #panel-derecho {
+            width: 350px;
+            background-color: white;
+            border-left: 2px solid #ccc;
+            overflow-y: auto;
+            padding: 12px;
+            box-shadow: -2px 0 5px rgba(0,0,0,0.1);
+        }
+        #panel-derecho h3 {
+            margin: 0 0 8px 0;
+            font-size: 14px;
+            color: #333;
+        }
+        #panel-derecho > p {
+            font-size: 10px;
+            color: #666;
+            margin: 0 0 10px 0;
+        }
+        #panel-derecho table {
+            font-size: 10px;
+            width: 100%;
+            border-collapse: collapse;
+        }
+        #panel-derecho table thead {
+            background-color: #007bff;
+            color: white;
+            position: sticky;
+            top: 0;
+        }
+        #panel-derecho table th {
+            padding: 6px;
+            text-align: left;
+            font-weight: bold;
+        }
+        #panel-derecho table td {
+            padding: 5px;
+            border-bottom: 1px solid #eee;
+        }
+        #panel-derecho table tbody tr:nth-child(odd) {
+            background-color: #f9f9f9;
+        }
+        #panel-derecho table tbody tr:hover {
+            background-color: #e8f4f8;
+        }
+        #panel-derecho table td:last-child {
+            text-align: right;
+            font-weight: bold;
+        }
+        #panel-derecho table tbody tr.diesel-row {
+            background-color: #ffe6e6;
+            font-weight: bold;
+        }
+        .info { 
+            padding: 8px 12px; 
+            background: white; 
+            box-shadow: 0 0 15px rgba(0,0,0,0.2); 
+            border-radius: 5px;
+            font-size: 12px;
+        }
+        .legend { 
+            line-height: 18px; 
+            color: #555;
+            font-size: 11px;
+        }
+        .legend h4 { margin: 0 0 10px 0; font-size: 14px; }
+        .legend i { 
+            width: 18px; 
+            height: 18px; 
+            float: left; 
+            margin-right: 8px;
+            opacity: 0.8;
+        }
+        .legend .line-legend {
+            width: 30px;
+            height: 3px;
+            float: left;
+            margin-right: 8px;
+            margin-top: 8px;
+        }
+        .casa-label {
+            background-color: transparent !important;
+            border: none !important;
+            box-shadow: none !important;
+            color: #d32f2f !important;
+            font-weight: bold !important;
+            font-size: 10px !important;
+            text-align: center !important;
+        }
+        .nodo-label {
+            background-color: transparent !important;
+            border: none !important;
+            box-shadow: none !important;
+            color: #ff8c00 !important;
+            font-weight: bold !important;
+            font-size: 11px !important;
+            text-align: center !important;
+        }
+    </style>
+</head>
+<body>
+    <div id="map"></div>
+    <div id="panel-derecho">
+        <h3>📏 Tabla de Distancias</h3>
+        <p>Todas las distancias en metros. Mapa limpio para mejor visualización.</p>
+        <table border="1" cellpadding="6" cellspacing="0">
+            <thead>
+                <tr>
+                    <th>Desde</th>
+                    <th>Hasta</th>
+                    <th>m</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr><td>Nodo 2</td><td>Nodo 1</td><td>27.54</td></tr>
+                <tr><td>Nodo 3</td><td>Nodo 1</td><td>27.83</td></tr>
+                <tr style="background-color: #e8f8ff;"><td>Casa 15</td><td>Nodo 3</td><td><b>7.31</b></td></tr>
+                <tr><td>Nodo 4</td><td>Nodo 2</td><td>27.54</td></tr>
+                <tr><td>Nodo 4</td><td>Nodo 7</td><td>29.54</td></tr>
+                <tr style="background-color: #e8f8ff;"><td>Casa 14</td><td>Nodo 4</td><td><b>0.00</b></td></tr>
+                <tr><td>Nodo 5</td><td>Nodo 3</td><td>18.56</td></tr>
+                <tr><td>Nodo 5</td><td>Nodo 8</td><td>22.32</td></tr>
+                <tr style="background-color: #e8f8ff;"><td>Casa 16</td><td>Nodo 5</td><td><b>12.31</b></td></tr>
+                <tr style="background-color: #e8f8ff;"><td>Casa 17</td><td>Nodo 5</td><td><b>17.17</b></td></tr>
+                <tr><td>Nodo 6</td><td>Nodo 4</td><td>28.45</td></tr>
+                <tr><td>Nodo 7</td><td>Nodo 10</td><td>29.54</td></tr>
+                <tr><td>Nodo 8</td><td>Nodo 11</td><td>23.88</td></tr>
+                <tr><td>Nodo 9</td><td>Nodo 6</td><td>28.45</td></tr>
+                <tr><td>Nodo 10</td><td>Nodo 13</td><td>29.54</td></tr>
+                <tr><td>Nodo 11</td><td>Nodo 14</td><td>28.57</td></tr>
+                <tr><td>Nodo 12</td><td>Nodo 9</td><td>28.45</td></tr>
+                <tr><td>Nodo 13</td><td>Nodo 17</td><td>29.54</td></tr>
+                <tr><td>Nodo 14</td><td>Nodo 18</td><td>28.57</td></tr>
+                <tr><td>Nodo 15</td><td>Nodo 11</td><td>21.98</td></tr>
+                <tr><td>Nodo 16</td><td>Nodo 12</td><td>28.45</td></tr>
+                <tr><td>Nodo 17</td><td>Nodo 21</td><td>29.54</td></tr>
+                <tr><td>Nodo 18</td><td>Nodo 22</td><td>28.57</td></tr>
+                <tr><td>Nodo 19</td><td>Nodo 15</td><td>21.98</td></tr>
+                <tr><td>Nodo 19</td><td>Nodo 23</td><td>29.22</td></tr>
+                <tr><td>Nodo 20</td><td>Nodo 16</td><td>28.45</td></tr>
+                <tr><td>Nodo 22</td><td>Nodo 26</td><td>21.62</td></tr>
+                <tr style="background-color: #e8f8ff;"><td>Casa 30</td><td>Nodo 22</td><td><b>0.00</b></td></tr>
+                <tr><td>Nodo 23</td><td>Nodo 27</td><td>25.90</td></tr>
+                <tr style="background-color: #e8f8ff;"><td>Casa 18</td><td>Nodo 23</td><td><b>0.00</b></td></tr>
+                <tr><td>Nodo 24</td><td>Nodo 20</td><td>28.45</td></tr>
+                <tr><td>Nodo 25</td><td>Nodo 21</td><td>28.22</td></tr>
+                <tr style="background-color: #e8f8ff;"><td>Casa 28</td><td>Nodo 25</td><td><b>4.94</b></td></tr>
+                <tr style="background-color: #e8f8ff;"><td>Casa 29</td><td>Nodo 25</td><td><b>11.34</b></td></tr>
+                <tr style="background-color: #e8f8ff;"><td>Casa 27</td><td>Nodo 25</td><td><b>14.87</b></td></tr>
+                <tr><td>Nodo 26</td><td>Nodo 29</td><td>24.25</td></tr>
+                <tr><td>Nodo 27</td><td>Nodo 30</td><td>25.90</td></tr>
+                <tr><td>Nodo 28</td><td>Nodo 24</td><td>28.45</td></tr>
+                <tr style="background-color: #e8f8ff;"><td>Casa 32</td><td>Nodo 29</td><td><b>2.82</b></td></tr>
+                <tr style="background-color: #e8f8ff;"><td>Casa 31</td><td>Nodo 29</td><td><b>2.82</b></td></tr>
+                <tr><td>Nodo 30</td><td>Nodo 34</td><td>25.90</td></tr>
+                <tr><td>Nodo 31</td><td>Nodo 28</td><td>28.45</td></tr>
+                <tr><td>Nodo 32</td><td>Nodo 29</td><td>30.00</td></tr>
+                <tr><td>Nodo 32</td><td>Nodo 36</td><td>30.00</td></tr>
+                <tr><td>Nodo 33</td><td>Nodo 37</td><td>27.74</td></tr>
+                <tr><td>Nodo 33</td><td>Nodo 29</td><td>29.11</td></tr>
+                <tr><td>Nodo 34</td><td>Nodo 38</td><td>29.69</td></tr>
+                <tr style="background-color: #e8f8ff;"><td>Casa 19</td><td>Nodo 34</td><td><b>0.00</b></td></tr>
+                <tr><td>Nodo 35</td><td>Nodo 31</td><td>20.59</td></tr>
+                <tr style="background-color: #e8f8ff;"><td>Casa 35</td><td>Nodo 36</td><td><b>18.43</b></td></tr>
+                <tr><td>Nodo 37</td><td>Nodo 40</td><td>29.84</td></tr>
+                <tr><td>Nodo 38</td><td>Nodo 41</td><td>23.58</td></tr>
+                <tr style="background-color: #e8f8ff;"><td>Casa 20</td><td>Nodo 38</td><td><b>0.00</b></td></tr>
+                <tr><td>Nodo 39</td><td>Nodo 43</td><td>8.69</td></tr>
+                <tr><td>Nodo 39</td><td>Nodo 35</td><td>20.59</td></tr>
+                <tr><td>Nodo 39</td><td>Nodo 42</td><td>28.48</td></tr>
+                <tr style="background-color: #e8f8ff;"><td>Casa 9</td><td>Nodo 39</td><td><b>9.47</b></td></tr>
+                <tr style="background-color: #e8f8ff;"><td>Casa 10</td><td>Nodo 39</td><td><b>9.47</b></td></tr>
+                <tr style="background-color: #e8f8ff;"><td>Casa 33</td><td>Nodo 40</td><td><b>2.91</b></td></tr>
+                <tr style="background-color: #e8f8ff;"><td>Casa 34</td><td>Nodo 40</td><td><b>8.30</b></td></tr>
+                <tr><td>Nodo 41</td><td>Nodo 44</td><td>23.58</td></tr>
+                <tr style="background-color: #e8f8ff;"><td>Casa 12</td><td>Nodo 43</td><td><b>18.88</b></td></tr>
+                <tr style="background-color: #e8f8ff;"><td>Casa 11</td><td>Nodo 43</td><td><b>18.88</b></td></tr>
+                <tr><td>Nodo 44</td><td>Nodo 46</td><td>26.16</td></tr>
+                <tr style="background-color: #e8f8ff;"><td>Casa 21</td><td>Nodo 44</td><td><b>0.00</b></td></tr>
+                <tr><td>Nodo 45</td><td>Nodo 42</td><td>22.70</td></tr>
+                <tr><td>Nodo 46</td><td>Nodo 48</td><td>26.16</td></tr>
+                <tr><td>Nodo 47</td><td>Nodo 45</td><td>22.70</td></tr>
+                <tr><td>Nodo 48</td><td>Nodo 50</td><td>20.27</td></tr>
+                <tr style="background-color: #e8f8ff;"><td>Casa 22</td><td>Nodo 48</td><td><b>0.00</b></td></tr>
+                <tr><td>Nodo 49</td><td>Nodo 52</td><td>19.43</td></tr>
+                <tr><td>Nodo 49</td><td>Nodo 47</td><td>22.70</td></tr>
+                <tr style="background-color: #e8f8ff;"><td>Casa 6</td><td>Nodo 49</td><td><b>0.00</b></td></tr>
+                <tr><td>Nodo 50</td><td>Nodo 53</td><td>20.27</td></tr>
+                <tr><td>Nodo 51</td><td>Nodo 49</td><td>29.45</td></tr>
+                <tr><td>Nodo 52</td><td>Nodo 55</td><td>18.30</td></tr>
+                <tr><td>Nodo 53</td><td>Nodo 56</td><td>20.27</td></tr>
+                <tr><td>Nodo 54</td><td>Nodo 51</td><td>29.45</td></tr>
+                <tr style="background-color: #e8f8ff;"><td>Casa 8</td><td>Nodo 55</td><td><b>0.00</b></td></tr>
+                <tr style="background-color: #e8f8ff;"><td>Casa 7</td><td>Nodo 55</td><td><b>1.33</b></td></tr>
+                <tr><td>Nodo 56</td><td>Nodo 58</td><td>29.21</td></tr>
+                <tr style="background-color: #e8f8ff;"><td>Casa 23</td><td>Nodo 56</td><td><b>0.00</b></td></tr>
+                <tr><td>Nodo 57</td><td>Nodo 59</td><td>24.54</td></tr>
+                <tr><td>Nodo 57</td><td>Nodo 54</td><td>29.45</td></tr>
+                <tr style="background-color: #e8f8ff;"><td>Casa 4</td><td>Nodo 57</td><td><b>0.00</b></td></tr>
+                <tr><td>Nodo 58</td><td>Nodo 60</td><td>29.21</td></tr>
+                <tr><td>Nodo 59</td><td>Nodo 61</td><td>24.54</td></tr>
+                <tr><td>Nodo 60</td><td>Nodo 62</td><td>29.21</td></tr>
+                <tr><td>Nodo 61</td><td>Nodo 64</td><td>24.54</td></tr>
+                <tr><td>Nodo 62</td><td>Nodo 65</td><td>29.21</td></tr>
+                <tr><td>Nodo 63</td><td>Nodo 61</td><td>24.14</td></tr>
+                <tr style="background-color: #e8f8ff;"><td>Casa 5</td><td>Nodo 64</td><td><b>0.00</b></td></tr>
+                <tr><td>Nodo 65</td><td>Nodo 67</td><td>25.39</td></tr>
+                <tr style="background-color: #e8f8ff;"><td>Casa 24</td><td>Nodo 65</td><td><b>0.00</b></td></tr>
+                <tr><td>Nodo 66</td><td>Nodo 63</td><td>27.64</td></tr>
+                <tr><td>Nodo 67</td><td>Nodo 69</td><td>25.39</td></tr>
+                <tr><td>Nodo 68</td><td>Nodo 66</td><td>27.64</td></tr>
+                <tr><td>Nodo 69</td><td>Nodo 71</td><td>27.61</td></tr>
+                <tr style="background-color: #e8f8ff;"><td>Casa 25</td><td>Nodo 69</td><td><b>0.00</b></td></tr>
+                <tr><td>Nodo 70</td><td>Nodo 72</td><td>20.71</td></tr>
+                <tr><td>Nodo 70</td><td>Nodo 68</td><td>27.64</td></tr>
+                <tr><td>Nodo 71</td><td>Nodo 73</td><td>27.61</td></tr>
+                <tr><td>Nodo 72</td><td>Nodo 75</td><td>20.71</td></tr>
+                <tr style="background-color: #e8f8ff;"><td>Casa 26</td><td>Nodo 73</td><td><b>0.00</b></td></tr>
+                <tr><td>Nodo 74</td><td>Nodo 72</td><td>19.89</td></tr>
+                <tr style="background-color: #e8f8ff;"><td>Casa 1</td><td>Nodo 74</td><td><b>0.00</b></td></tr>
+                <tr style="background-color: #e8f8ff;"><td>Casa 13</td><td>Nodo 74</td><td><b>18.05</b></td></tr>
+                <tr style="background-color: #e8f8ff;"><td>Casa 3</td><td>Nodo 75</td><td><b>6.09</b></td></tr>
+                <tr style="background-color: #e8f8ff;"><td>Casa 2</td><td>Nodo 75</td><td><b>6.09</b></td></tr>
+                <tr class="diesel-row"><td>Generador Diesel</td><td>Nodo 1</td><td>25.00</td></tr>
+            </tbody>
+        </table>
+    </div>
+    
+    <script>
+        const centro = [11.6090, -72.7985];
+        const map = L.map('map').setView(centro, 15);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors',
+            maxZoom: 19
+        }).addTo(map);
+
+        const homeIcon = L.divIcon({
+            html: '<i class="fa-solid fa-house" style="color: red; font-size: 16px;"></i>',
+            iconSize: [20, 20],
+            iconAnchor: [10, 10],
+            popupAnchor: [0, -10],
+            className: 'custom-div-icon'
+        });
+
+        const nodeIcon = L.divIcon({
+            html: '<i class="fa-solid fa-circle-dot" style="color: orange; font-size: 18px;"></i>',
+            iconSize: [20, 20],
+            iconAnchor: [10, 10],
+            popupAnchor: [0, -10],
+            className: 'custom-div-icon'
+        });
+
+        const intermediateIcon = L.divIcon({
+            html: '<i class="fa-solid fa-circle" style="color: yellow; font-size: 14px; border: 2px solid purple; border-radius: 50%;"></i>',
+            iconSize: [20, 20],
+            iconAnchor: [10, 10],
+            popupAnchor: [0, -10],
+            className: 'custom-div-icon'
+        });
+
+        const dieselIcon = L.divIcon({
+            html: '<i class="fa-solid fa-industry" style="color: purple; font-size: 24px;"></i>',
+            iconSize: [30, 30],
+            iconAnchor: [15, 15],
+            popupAnchor: [0, -15],
+            className: 'custom-div-icon'
+        });
+
+        const nodos = [{"id": 1, "latitud": 11.609697766666667, "longitud": -72.79870639333333, "tipo": "intermedio"}, {"id": 2, "latitud": 11.609589383333335, "longitud": -72.79893419666666, "tipo": "intermedio"}, {"id": 3, "latitud": 11.609862472666666, "longitud": -72.79851336533333, "tipo": "distribucion"}, {"id": 4, "latitud": 11.609481, "longitud": -72.799162, "tipo": "distribucion"}, {"id": 5, "latitud": 11.609972276666667, "longitud": -72.79838468, "tipo": "distribucion"}, {"id": 6, "latitud": 11.609251167777778, "longitud": -72.79927774777778, "tipo": "intermedio"}, {"id": 7, "latitud": 11.609593515, "longitud": -72.79940820666667, "tipo": "intermedio"}, {"id": 8, "latitud": 11.610072063833334, "longitud": -72.79856292891667, "tipo": "intermedio"}, {"id": 9, "latitud": 11.609021335555555, "longitud": -72.79939349555555, "tipo": "intermedio"}, {"id": 10, "latitud": 11.60970603, "longitud": -72.79965441333333, "tipo": "intermedio"}, {"id": 11, "latitud": 11.610281655000001, "longitud": -72.7986124925, "tipo": "intermedio"}, {"id": 12, "latitud": 11.608791503333334, "longitud": -72.79950924333333, "tipo": "intermedio"}, {"id": 13, "latitud": 11.609818545, "longitud": -72.79990061999999, "tipo": "intermedio"}, {"id": 14, "latitud": 11.6104374, "longitud": -72.798821675, "tipo": "intermedio"}, {"id": 15, "latitud": 11.610294805, "longitud": -72.79841082375, "tipo": "intermedio"}, {"id": 16, "latitud": 11.608561671111111, "longitud": -72.79962499111112, "tipo": "intermedio"}, {"id": 17, "latitud": 11.609931060000001, "longitud": -72.80014682666666, "tipo": "intermedio"}, {"id": 18, "latitud": 11.610593145, "longitud": -72.7990308575, "tipo": "intermedio"}, {"id": 19, "latitud": 11.610307955, "longitud": -72.798209155, "tipo": "intermedio"}, {"id": 20, "latitud": 11.608331838888889, "longitud": -72.79974073888889, "tipo": "intermedio"}, {"id": 21, "latitud": 11.610043575, "longitud": -72.80039303333334, "tipo": "intermedio"}, {"id": 22, "latitud": 11.61074889, "longitud": -72.79924004, "tipo": "distribucion"}, {"id": 23, "latitud": 11.61049, "longitud": -72.798015, "tipo": "distribucion"}, {"id": 24, "latitud": 11.608102006666666, "longitud": -72.79985648666667, "tipo": "intermedio"}, {"id": 25, "latitud": 11.610251159999999, "longitud": -72.80054284333333, "tipo": "distribucion"}, {"id": 26, "latitud": 11.610907560000001, "longitud": -72.79912476999999, "tipo": "intermedio"}, {"id": 27, "latitud": 11.610556343333334, "longitud": -72.79778660666668, "tipo": "intermedio"}, {"id": 28, "latitud": 11.607872174444445, "longitud": -72.79997223444445, "tipo": "intermedio"}, {"id": 29, "latitud": 11.611079855, "longitud": -72.798987635, "tipo": "distribucion"}, {"id": 30, "latitud": 11.610622686666666, "longitud": -72.79755821333333, "tipo": "intermedio"}, {"id": 31, "latitud": 11.607642342222222, "longitud": -72.80008798222222, "tipo": "intermedio"}, {"id": 32, "latitud": 11.611203100311288, "longitud": -72.79923319419181, "tipo": "intermedio"}, {"id": 33, "latitud": 11.611342023333332, "longitud": -72.79899259999999, "tipo": "intermedio"}, {"id": 34, "latitud": 11.61068903, "longitud": -72.79732982, "tipo": "distribucion"}, {"id": 35, "latitud": 11.60747060611111, "longitud": -72.80015951861111, "tipo": "intermedio"}, {"id": 36, "latitud": 11.611326345622574, "longitud": -72.79947875338362, "tipo": "distribucion"}, {"id": 37, "latitud": 11.611590566666667, "longitud": -72.79901943, "tipo": "intermedio"}, {"id": 38, "latitud": 11.6105109, "longitud": -72.7971261, "tipo": "distribucion"}, {"id": 39, "latitud": 11.60729887, "longitud": -72.800231055, "tipo": "distribucion"}, {"id": 40, "latitud": 11.611855275049999, "longitud": -72.79906735969999, "tipo": "distribucion"}, {"id": 41, "latitud": 11.610575144999999, "longitud": -72.796919405, "tipo": "intermedio"}, {"id": 42, "latitud": 11.60725336, "longitud": -72.79997330500001, "tipo": "intermedio"}, {"id": 43, "latitud": 11.607276235, "longitud": -72.800307575, "tipo": "distribucion"}, {"id": 44, "latitud": 11.61063939, "longitud": -72.79671271, "tipo": "distribucion"}, {"id": 45, "latitud": 11.60715991, "longitud": -72.7997876, "tipo": "intermedio"}, {"id": 46, "latitud": 11.610692695000001, "longitud": -72.796478355, "tipo": "intermedio"}, {"id": 47, "latitud": 11.60706646, "longitud": -72.799601895, "tipo": "intermedio"}, {"id": 48, "latitud": 11.610746, "longitud": -72.796244, "tipo": "distribucion"}, {"id": 49, "latitud": 11.60697301, "longitud": -72.79941619, "tipo": "distribucion"}, {"id": 50, "latitud": 11.610569556666666, "longitud": -72.796196, "tipo": "intermedio"}, {"id": 51, "latitud": 11.60678936, "longitud": -72.79922075333333, "tipo": "intermedio"}, {"id": 52, "latitud": 11.60683126, "longitud": -72.79952103, "tipo": "intermedio"}, {"id": 53, "latitud": 11.610393113333334, "longitud": -72.796148, "tipo": "intermedio"}, {"id": 54, "latitud": 11.60660571, "longitud": -72.79902531666667, "tipo": "intermedio"}, {"id": 55, "latitud": 11.60670149, "longitud": -72.79962487, "tipo": "distribucion"}, {"id": 56, "latitud": 11.61021667, "longitud": -72.7961, "tipo": "distribucion"}, {"id": 57, "latitud": 11.60642206, "longitud": -72.79882988, "tipo": "distribucion"}, {"id": 58, "latitud": 11.610029704999999, "longitud": -72.795910955, "tipo": "intermedio"}, {"id": 59, "latitud": 11.606503943333333, "longitud": -72.7986202, "tipo": "intermedio"}, {"id": 60, "latitud": 11.60984274, "longitud": -72.79572191, "tipo": "intermedio"}, {"id": 61, "latitud": 11.606585826666667, "longitud": -72.79841052, "tipo": "intermedio"}, {"id": 62, "latitud": 11.609655775, "longitud": -72.795532865, "tipo": "intermedio"}, {"id": 63, "latitud": 11.606386043333334, "longitud": -72.79832274, "tipo": "intermedio"}, {"id": 64, "latitud": 11.60666771, "longitud": -72.79820084, "tipo": "distribucion"}, {"id": 65, "latitud": 11.60946881, "longitud": -72.79534382, "tipo": "distribucion"}, {"id": 66, "latitud": 11.606368035, "longitud": -72.79806916999999, "tipo": "intermedio"}, {"id": 67, "latitud": 11.609240325, "longitud": -72.79533314, "tipo": "intermedio"}, {"id": 68, "latitud": 11.606350026666666, "longitud": -72.79781559999999, "tipo": "intermedio"}, {"id": 69, "latitud": 11.60901184, "longitud": -72.79532246, "tipo": "distribucion"}, {"id": 70, "latitud": 11.606332018333333, "longitud": -72.79756203, "tipo": "intermedio"}, {"id": 71, "latitud": 11.60905142, "longitud": -72.79507172999999, "tipo": "intermedio"}, {"id": 72, "latitud": 11.606456126666666, "longitud": -72.79741984, "tipo": "intermedio"}, {"id": 73, "latitud": 11.609091, "longitud": -72.794821, "tipo": "distribucion"}, {"id": 74, "latitud": 11.60631401, "longitud": -72.79730846, "tipo": "distribucion"}, {"id": 75, "latitud": 11.606580235, "longitud": -72.79727765, "tipo": "distribucion"}];
+        const casas = [{"id": 1, "latitud": 11.60631401, "longitud": -72.79730846, "nodo_asociado": 74}, {"id": 13, "latitud": 11.6063556, "longitud": -72.797148, "nodo_asociado": 74}, {"id": 2, "latitud": 11.60652621, "longitud": -72.79726771, "nodo_asociado": 75}, {"id": 3, "latitud": 11.60663426, "longitud": -72.79728759, "nodo_asociado": 75}, {"id": 4, "latitud": 11.60642206, "longitud": -72.79882988, "nodo_asociado": 57}, {"id": 5, "latitud": 11.60666771, "longitud": -72.79820084, "nodo_asociado": 64}, {"id": 6, "latitud": 11.60697301, "longitud": -72.79941619, "nodo_asociado": 49}, {"id": 7, "latitud": 11.60668951, "longitud": -72.79962587, "nodo_asociado": 55}, {"id": 8, "latitud": 11.60670149, "longitud": -72.79962487, "nodo_asociado": 55}, {"id": 9, "latitud": 11.60734681, "longitud": -72.80015901, "nodo_asociado": 39}, {"id": 10, "latitud": 11.60725093, "longitud": -72.8003031, "nodo_asociado": 39}, {"id": 11, "latitud": 11.60713996, "longitud": -72.80041142, "nodo_asociado": 43}, {"id": 12, "latitud": 11.60741251, "longitud": -72.80020373, "nodo_asociado": 43}, {"id": 14, "latitud": 11.609481, "longitud": -72.799162, "nodo_asociado": 4}, {"id": 15, "latitud": 11.60980615, "longitud": -72.79847859, "nodo_asociado": 3}, {"id": 16, "latitud": 11.60998477, "longitud": -72.79827214, "nodo_asociado": 5}, {"id": 17, "latitud": 11.61012591, "longitud": -72.79840331, "nodo_asociado": 5}, {"id": 18, "latitud": 11.61049, "longitud": -72.798015, "nodo_asociado": 23}, {"id": 19, "latitud": 11.61068903, "longitud": -72.79732982, "nodo_asociado": 34}, {"id": 20, "latitud": 11.6105109, "longitud": -72.7971261, "nodo_asociado": 38}, {"id": 21, "latitud": 11.61063939, "longitud": -72.79671271, "nodo_asociado": 44}, {"id": 22, "latitud": 11.610746, "longitud": -72.796244, "nodo_asociado": 48}, {"id": 23, "latitud": 11.61021667, "longitud": -72.7961, "nodo_asociado": 56}, {"id": 24, "latitud": 11.60946881, "longitud": -72.79534382, "nodo_asociado": 65}, {"id": 25, "latitud": 11.60901184, "longitud": -72.79532246, "nodo_asociado": 69}, {"id": 26, "latitud": 11.609091, "longitud": -72.794821, "nodo_asociado": 73}, {"id": 27, "latitud": 11.61015609, "longitud": -72.80063924, "nodo_asociado": 25}, {"id": 28, "latitud": 11.61029529, "longitud": -72.80053688, "nodo_asociado": 25}, {"id": 29, "latitud": 11.6103021, "longitud": -72.80045241, "nodo_asociado": 25}, {"id": 30, "latitud": 11.61074889, "longitud": -72.79924004, "nodo_asociado": 22}, {"id": 31, "latitud": 11.61106623, "longitud": -72.7990095, "nodo_asociado": 29}, {"id": 32, "latitud": 11.61109348, "longitud": -72.79896577, "nodo_asociado": 29}, {"id": 33, "latitud": 11.61183911, "longitud": -72.79904626, "nodo_asociado": 40}, {"id": 34, "latitud": 11.6119238, "longitud": -72.79909794, "nodo_asociado": 40}, {"id": 35, "latitud": 11.61140205, "longitud": -72.79962959, "nodo_asociado": 36}];
+        const conexiones = [{"nodo1": 2, "nodo2": 1, "distancia_m": 27.54, "con_intermedio": true}, {"nodo1": 4, "nodo2": 2, "distancia_m": 27.54, "con_intermedio": true}, {"nodo1": 4, "nodo2": 7, "distancia_m": 29.54, "con_intermedio": true}, {"nodo1": 6, "nodo2": 4, "distancia_m": 28.45, "con_intermedio": true}, {"nodo1": 7, "nodo2": 10, "distancia_m": 29.54, "con_intermedio": true}, {"nodo1": 19, "nodo2": 23, "distancia_m": 29.22, "con_intermedio": true}, {"nodo1": 11, "nodo2": 14, "distancia_m": 28.57, "con_intermedio": true}, {"nodo1": 9, "nodo2": 6, "distancia_m": 28.45, "con_intermedio": true}, {"nodo1": 10, "nodo2": 13, "distancia_m": 29.54, "con_intermedio": true}, {"nodo1": 23, "nodo2": 27, "distancia_m": 25.9, "con_intermedio": true}, {"nodo1": 14, "nodo2": 18, "distancia_m": 28.57, "con_intermedio": true}, {"nodo1": 12, "nodo2": 9, "distancia_m": 28.45, "con_intermedio": true}, {"nodo1": 13, "nodo2": 17, "distancia_m": 29.54, "con_intermedio": true}, {"nodo1": 27, "nodo2": 30, "distancia_m": 25.9, "con_intermedio": true}, {"nodo1": 18, "nodo2": 22, "distancia_m": 28.57, "con_intermedio": true}, {"nodo1": 16, "nodo2": 12, "distancia_m": 28.45, "con_intermedio": true}, {"nodo1": 17, "nodo2": 21, "distancia_m": 29.54, "con_intermedio": true}, {"nodo1": 30, "nodo2": 34, "distancia_m": 25.9, "con_intermedio": true}, {"nodo1": 22, "nodo2": 26, "distancia_m": 21.62, "con_intermedio": true}, {"nodo1": 20, "nodo2": 16, "distancia_m": 28.45, "con_intermedio": true}, {"nodo1": 34, "nodo2": 38, "distancia_m": 29.69, "con_intermedio": false}, {"nodo1": 24, "nodo2": 20, "distancia_m": 28.45, "con_intermedio": true}, {"nodo1": 38, "nodo2": 41, "distancia_m": 23.58, "con_intermedio": true}, {"nodo1": 28, "nodo2": 24, "distancia_m": 28.45, "con_intermedio": true}, {"nodo1": 41, "nodo2": 44, "distancia_m": 23.58, "con_intermedio": true}, {"nodo1": 31, "nodo2": 28, "distancia_m": 28.45, "con_intermedio": true}, {"nodo1": 44, "nodo2": 46, "distancia_m": 26.16, "con_intermedio": true}, {"nodo1": 33, "nodo2": 37, "distancia_m": 27.74, "con_intermedio": true}, {"nodo1": 46, "nodo2": 48, "distancia_m": 26.16, "con_intermedio": true}, {"nodo1": 48, "nodo2": 50, "distancia_m": 20.27, "con_intermedio": true}, {"nodo1": 50, "nodo2": 53, "distancia_m": 20.27, "con_intermedio": true}, {"nodo1": 45, "nodo2": 42, "distancia_m": 22.7, "con_intermedio": true}, {"nodo1": 53, "nodo2": 56, "distancia_m": 20.27, "con_intermedio": true}, {"nodo1": 47, "nodo2": 45, "distancia_m": 22.7, "con_intermedio": true}, {"nodo1": 56, "nodo2": 58, "distancia_m": 29.21, "con_intermedio": true}, {"nodo1": 49, "nodo2": 47, "distancia_m": 22.7, "con_intermedio": true}, {"nodo1": 49, "nodo2": 52, "distancia_m": 19.43, "con_intermedio": true}, {"nodo1": 58, "nodo2": 60, "distancia_m": 29.21, "con_intermedio": true}, {"nodo1": 51, "nodo2": 49, "distancia_m": 29.45, "con_intermedio": true}, {"nodo1": 60, "nodo2": 62, "distancia_m": 29.21, "con_intermedio": true}, {"nodo1": 54, "nodo2": 51, "distancia_m": 29.45, "con_intermedio": true}, {"nodo1": 62, "nodo2": 65, "distancia_m": 29.21, "con_intermedio": true}, {"nodo1": 57, "nodo2": 54, "distancia_m": 29.45, "con_intermedio": true}, {"nodo1": 57, "nodo2": 59, "distancia_m": 24.54, "con_intermedio": true}, {"nodo1": 65, "nodo2": 67, "distancia_m": 25.39, "con_intermedio": true}, {"nodo1": 59, "nodo2": 61, "distancia_m": 24.54, "con_intermedio": true}, {"nodo1": 67, "nodo2": 69, "distancia_m": 25.39, "con_intermedio": true}, {"nodo1": 61, "nodo2": 64, "distancia_m": 24.54, "con_intermedio": true}, {"nodo1": 69, "nodo2": 71, "distancia_m": 27.61, "con_intermedio": true}, {"nodo1": 66, "nodo2": 63, "distancia_m": 27.64, "con_intermedio": true}, {"nodo1": 71, "nodo2": 73, "distancia_m": 27.61, "con_intermedio": true}, {"nodo1": 68, "nodo2": 66, "distancia_m": 27.64, "con_intermedio": true}, {"nodo1": 70, "nodo2": 68, "distancia_m": 27.64, "con_intermedio": true}, {"nodo1": 70, "nodo2": 72, "distancia_m": 20.71, "con_intermedio": true}, {"nodo1": 72, "nodo2": 75, "distancia_m": 20.71, "con_intermedio": true}, {"nodo1": 52, "nodo2": 55, "distancia_m": 18.302053896651653, "con_intermedio": false}, {"nodo1": 39, "nodo2": 43, "distancia_m": 8.691106001054603, "con_intermedio": false}, {"nodo1": 39, "nodo2": 42, "distancia_m": 28.476805788551243, "con_intermedio": false}, {"nodo1": 39, "nodo2": 35, "distancia_m": 20.588503175456218, "con_intermedio": true}, {"nodo1": 35, "nodo2": 31, "distancia_m": 20.588501366281317, "con_intermedio": true}, {"nodo1": 25, "nodo2": 21, "distancia_m": 28.217932978234085, "con_intermedio": false}, {"nodo1": 5, "nodo2": 3, "distancia_m": 18.555982526262763, "con_intermedio": true}, {"nodo1": 3, "nodo2": 1, "con_intermedio": true, "distancia": 27.83}, {"nodo1": 19, "nodo2": 15, "distancia_m": 21.975738129228578, "con_intermedio": true}, {"nodo1": 15, "nodo2": 11, "distancia_m": 21.97573915937621, "con_intermedio": true}, {"nodo1": 8, "nodo2": 11, "distancia_m": 23.880614910924027, "con_intermedio": true}, {"nodo1": 33, "nodo2": 29, "distancia": 29.11, "intermedio": false}, {"nodo1": 37, "nodo2": 40, "distancia_m": 29.841192533952313, "con_intermedio": false}, {"nodo1": 32, "nodo2": 29, "distancia": 30.0, "intermedio": false}, {"nodo1": 26, "nodo2": 29, "distancia": 24.25, "intermedio": false}, {"nodo1": 32, "nodo2": 36, "distancia": 30.0, "intermedio": false}, {"nodo1": 63, "nodo2": 61, "distancia": 24.14, "intermedio": false}, {"nodo1": 74, "nodo2": 72, "distancia": 19.89, "intermedio": false}, {"nodo1": 5, "nodo2": 8, "distancia": 22.32, "intermedio": false}];
+        const diesel = [11.60948677, -72.79862597];
+
+        const nodosMap = {};
+        nodos.forEach(n => {
+            nodosMap[n.id] = n;
+        });
+
+        const casasMap = {};
+        casas.forEach(c => {
+            casasMap[c.id] = c;
+        });
+
+        // DIBUJAR CONEXIONES NODO-NODO (sin distancias)
+        conexiones.forEach(function(conexion) {
+            const nodo1 = nodosMap[conexion.nodo1];
+            const nodo2 = nodosMap[conexion.nodo2];
+            
+            if (nodo1 && nodo2) {
+                L.polyline(
+                    [[nodo1.latitud, nodo1.longitud], [nodo2.latitud, nodo2.longitud]], 
+                    {
+                        color: 'red',
+                        weight: 2,
+                        opacity: 0.6
+                    }
+                ).addTo(map);
+            }
+        });
+
+        // DIBUJAR CONEXIONES CASA-NODO
+        casas.forEach(function(casa) {
+            const nodo = nodosMap[casa.nodo_asociado];
+            
+            if (nodo) {
+                L.polyline(
+                    [[casa.latitud, casa.longitud], [nodo.latitud, nodo.longitud]], 
+                    {
+                        color: 'blue',
+                        weight: 2,
+                        opacity: 0.5,
+                        dashArray: '5, 5'
+                    }
+                ).addTo(map);
+            }
+        });
+
+        // CONEXIÓN DIESEL
+        const nodo_diesel_id = 1;
+        const nodo_diesel = nodosMap[nodo_diesel_id];
+        
+        if (nodo_diesel) {
+            L.polyline(
+                [[diesel[0], diesel[1]], [nodo_diesel.latitud, nodo_diesel.longitud]], 
+                {
+                    color: 'purple',
+                    weight: 3,
+                    opacity: 0.8
+                }
+            ).addTo(map);
+        }
+
+        // MARCADORES DE NODOS
+        nodos.forEach(function(nodo) {
+            let icon, popup_contenido;
+            
+            if (nodo.tipo === 'distribucion') {
+                icon = nodeIcon;
+                popup_contenido = `<b>Nodo ${nodo.id}</b><br>
+                    <small>Distribución</small><br>
+                    Lat: ${nodo.latitud.toFixed(6)}<br>
+                    Lon: ${nodo.longitud.toFixed(6)}`;
+            } else {
+                icon = intermediateIcon;
+                popup_contenido = `<b>Nodo ${nodo.id}</b><br>
+                    <small>Intermedio (conexión)</small><br>
+                    Lat: ${nodo.latitud.toFixed(6)}<br>
+                    Lon: ${nodo.longitud.toFixed(6)}`;
+            }
+            
+            const markerNodo = L.marker([nodo.latitud, nodo.longitud], {icon: icon})
+                .bindPopup(popup_contenido)
+                .addTo(map);
+
+            markerNodo.bindTooltip(`${nodo.id}`, {
+                permanent: true,
+                direction: 'top',
+                offset: [0, -12],
+                className: 'nodo-label'
+            });
+        });
+
+        // MARCADORES DE CASAS
+        casas.forEach(function(casa) {
+            const marker = L.marker([casa.latitud, casa.longitud], {icon: homeIcon})
+                .bindPopup(`<b>Casa ${casa.id}</b><br>
+                    Conectada a Nodo ${casa.nodo_asociado}<br>
+                    Lat: ${casa.latitud.toFixed(6)}<br>
+                    Lon: ${casa.longitud.toFixed(6)}`)
+                .addTo(map);
+            
+            // Agregar etiqueta a la derecha de la casa
+            marker.bindTooltip(`C${casa.id}`, {
+                permanent: true,
+                direction: 'right',
+                offset: [10, 0],
+                className: 'casa-label'
+            });
+        });
+
+        // DIESEL
+        L.marker(diesel, {icon: dieselIcon})
+            .bindPopup(`<b>Generador Diesel</b><br>
+                Ubicación Central<br>
+                Lat: ${diesel[0].toFixed(6)}<br>
+                Lon: ${diesel[1].toFixed(6)}<br>
+                <b>Conectado a:</b> Nodo ${nodo_diesel_id}<br>
+                <b>Distancia:</b> 25.00m`)
+            .addTo(map);
+
+        // LEYENDA
+        const legend = L.control({position: 'bottomleft'});
+        legend.onAdd = function(map) {
+            const div = L.DomUtil.create('div', 'info legend');
+            div.innerHTML = `
+                <h4>Elementos</h4>
+                <i class="fa-solid fa-house" style="color: red;"></i> Casas (35)<br>
+                <i class="fa-solid fa-circle-dot" style="color: orange;"></i> Nodos Distrib. (25)<br>
+                <i class="fa-solid fa-circle" style="color: yellow; border: 1px solid purple;"></i> Nodos Interm. (50)<br>
+                <i class="fa-solid fa-industry" style="color: purple;"></i> Diesel (1)<br>
+                <hr>
+                <h4 style="margin: 8px 0;">Conexiones</h4>
+                <div class="line-legend" style="background: red;"></div> Nodo-Nodo<br>
+                <div class="line-legend" style="background: blue;"></div> Casa-Nodo<br>
+                <div class="line-legend" style="background: purple;"></div> Diesel<br>
+                <hr>
+                <small><b>Total:</b> 75 nodos<br>
+                <b>Distancias:</b> Ver tabla →</small>
+            `;
+            return div;
+        };
+        legend.addTo(map);
+
+        // INFO
+        const info = L.control({position: 'topleft'});
+        info.onAdd = function(map) {
+            const div = L.DomUtil.create('div', 'info');
+            div.innerHTML = `
+                <h4 style="margin: 0; font-size: 14px;">Red DC La Guajira</h4>
+                <small>25 Nodos + 50 Interm. + 35 Casas</small>
+            `;
+            return div;
+        };
+        info.addTo(map);
+    </script>
+</body>
+</html>
